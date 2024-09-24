@@ -1,3 +1,4 @@
+#include <WS2812FX.h>
 #include <BluetoothSerial.h>
 #if !defined(CONFIG_BT_ENABLED) || !defined(CONFIG_BLUEDROID_ENABLED)
 #error Bluetooth is not enabled! Please run `make menuconfig` to and enable it
@@ -5,16 +6,26 @@
 BluetoothSerial SerialBT;
 String message = "";
 
+#define LED_COUNT 10
+#define LED_PIN 13
+WS2812FX ws2812fx = WS2812FX(LED_COUNT, LED_PIN, NEO_RGB + NEO_KHZ800);
+
+
+
 void setup() {
-  SerialBT.begin("CONTROLE_DA_PRANCHA 💡");  //Bluetooth device name
+  SerialBT.begin("OIIIIII💡");  //Bluetooth device name
   Serial.println("oi");
   delay(100);
   Serial.begin(115200);
+  ws2812fx.init();
+  ws2812fx.setBrightness(200);
+  ws2812fx.setSpeed(500);
+  //ws2812fx.setColor(0x007BFF);
+  //ws2812fx.start();
 }
 
 void loop() {
-  Serial.println("oi");
-  delay(100);
+  ws2812fx.service();
   if (SerialBT.available()) {
     char bt = SerialBT.read();
     if (bt != '\n') {
@@ -26,10 +37,16 @@ void loop() {
     Serial.print("   ____   ");
     Serial.println(message);
 
-    if (message == "tomada") {
+    if (message == ">") {
+      ws2812fx.setMode((ws2812fx.getMode() + 1) % ws2812fx.getModeCount());
+      ws2812fx.start();
+      SerialBT.println("f++++");
       //estado_pin_tomada = !estado_pin_tomada;
     }
-    if (message == "estrela") {
+    if (message == "<") {
+      ws2812fx.setMode((ws2812fx.getMode() - 1) % ws2812fx.getModeCount());
+      ws2812fx.start();
+      SerialBT.println("f------");
       //estado = !estado;
     }
    
